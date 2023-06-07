@@ -1,45 +1,55 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
-const GifsExpo = ({categories = []}) => {
-
-  const [urlList, setUrlList] = useState([])
+const GifsExpo = ({ categories = [] }) => {
+    const [urlList, setUrlList] = useState([])
 
     const getGifs = async (categories) => {
-
-      const responsesList = await Promise.all(categories.map(async (category) =>{
-        const response = await fetch(
-          `https://api.giphy.com/v1/gifs/search?api_key=C4kTA04UeVeljjVeBkLGaOTYrGYuKyFE&q=${category}&limit=10`
-        )
-        const apiResponse = await response.json()
-        return apiResponse.data
-      }))
-
-      let gifsList = []
-
-      responsesList.forEach((data) => {
-        data.forEach((item) => {
-          gifsList = [...gifsList, item.images.fixed_width.url]
-        })
-      })
-
-      setUrlList([...gifsList])
-    }
-    getGifs(categories)
-
-  return (
-    <div>
-      <h4>GifsExpo</h4>
-      <ol>
-        {
-          urlList.map((url) => {
-            return (
-              <li key={url}>{url}</li>
-            )
-          })
+        if (categories.length === 0) {
+            setUrlList([])
+            return
         }
-      </ol>
-    </div>
-  )
+
+        const responsesList = await Promise.all(categories.map(async (category) => {
+            const response = await fetch(
+                `https://api.giphy.com/v1/gifs/search?api_key=bFecPHiAkTVow7t545asASYOLFLTEADs&q=${category}&limit=10`
+            )
+            const apiResponse = await response.json()
+            return apiResponse.data
+        }))
+
+        let gifsList = []
+
+        responsesList.forEach((data) => {
+            data.forEach((item) => {
+                gifsList = [...gifsList, item.images.fixed_height.url.split('?')[0]]
+            })
+        })
+
+        setUrlList([...gifsList])
+    }
+
+    useEffect(() => {
+        //Efecto
+        getGifs(categories)  
+        },
+        //arreglo de dependencias
+        [categories]
+    )
+   
+
+    return (
+        <>
+            <div>
+                {
+                    urlList.map((url) => {
+                        return (
+                            <img key={url} src={url} />
+                        )
+                    })
+                }
+            </div>
+        </>
+    )
 }
 
 export default GifsExpo
